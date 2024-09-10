@@ -17,7 +17,7 @@ public class RDF4JPackage extends GoReplayPackage {
     /**
      * @see GoReplayPackage(Scanner)
      */
-    public RDF4JPackage(Scanner stream) throws NoSuchElementException, InterruptedException {
+    public RDF4JPackage(Scanner stream) throws NoSuchElementException {
         super(stream);
     }
 

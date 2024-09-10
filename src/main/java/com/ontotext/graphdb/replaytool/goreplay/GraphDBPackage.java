@@ -13,9 +13,9 @@ public class GraphDBPackage extends RDF4JPackage {
 
     static Pattern AUTHORIZATION_TOKEN = Pattern.compile("Authorization: ((\\w+) ([^\\s]+))", Pattern.CASE_INSENSITIVE);
 
-    static public String AUTHORIZATION_TYPE_NONE = "NONE";
-    static public String AUTHORIZATION_TYPE_BASIC = "basic";
-    static public String AUTHORIZATION_TYPE_GDB = "gdb";
+    static public final String AUTHORIZATION_TYPE_NONE = "NONE";
+    static public final String AUTHORIZATION_TYPE_BASIC = "basic";
+    static public final String AUTHORIZATION_TYPE_GDB = "gdb";
 
     private static final String HMAC_ALGO = "HmacSHA256";
 
@@ -53,7 +53,8 @@ public class GraphDBPackage extends RDF4JPackage {
             authorizationValue = matcher.group(1);
             authorizationType = matcher.group(2).toLowerCase();
             if (authorizationType.isEmpty() ||
-                    (authorizationType != AUTHORIZATION_TYPE_BASIC && authorizationType != AUTHORIZATION_TYPE_GDB)) {
+                    !(AUTHORIZATION_TYPE_BASIC.equals(authorizationType) ||
+                            AUTHORIZATION_TYPE_GDB.equals(authorizationType))) {
                 authorizationType = AUTHORIZATION_TYPE_NONE;
             } else {
                 authorizationToken = matcher.group(3);
@@ -139,7 +140,6 @@ public class GraphDBPackage extends RDF4JPackage {
      * Replace authorication token with a newly generated token for the same user
      *
      * @throws InvalidKeyException Thrown if the HMAC is not initialized
-     * @see GraphDBPackage.setAuthorizationSecret(String)
      */
     public void replaceAuthorizationToken() throws InvalidKeyException {
         if (!usesAuthorization()) return;
@@ -158,8 +158,7 @@ public class GraphDBPackage extends RDF4JPackage {
             receivedDecoded = receivedDecoded.replace(authorizationValue, newAuthorizationValue);
             authorizationValue = newAuthorizationValue;
             authorizationType = AUTHORIZATION_TYPE_GDB;
-            authorizationType = token;
+            authorizationToken = token;
         }
-        ;
     }
 }

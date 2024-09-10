@@ -40,7 +40,7 @@ public class GoReplayPackage {
      * </p>
      *
      * @param stream A Scanner connected to an imput stream that will receive the package
-     * @throws NoSuchElementException
+     * @throws NoSuchElementException If line is not found
      */
     public GoReplayPackage(Scanner stream) throws NoSuchElementException {
         receivedRaw = stream.nextLine();

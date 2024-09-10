@@ -1,5 +1,6 @@
 package com.ontotext.graphdb.replaytool.goreplay;
 
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ public class GoReplayMiddleware {
     HashMap<String, String> transactionMap = new HashMap<>();
     HashMap<String, String> byIdPool = new HashMap<>();
     List<GraphDBPackage> reprocessQueue = new ArrayList<>();
+    private Boolean processAuthorization = false;
 
     public GoReplayMiddleware(){
         Thread thread = Thread.currentThread();
@@ -20,6 +22,13 @@ public class GoReplayMiddleware {
             inOperation.set(false);
             thread.interrupt();
         }));
+        String authorizationSecret = System.getProperty("authorization.secret");
+        if (authorizationSecret != null) {
+            try {
+                GraphDBPackage.setAuthorizationSecret(authorizationSecret);
+                processAuthorization = true;
+            } catch (Exception ignore) {}
+        }
     }
 
     public void run(){
@@ -62,6 +71,11 @@ public class GoReplayMiddleware {
                             byIdPool.put(id, pkg.getCompoundTransaction());
                         }
                     }
+                }
+                if(processAuthorization && pkg.usesAuthorization()) {
+                    try {
+                        pkg.replaceAuthorizationToken();
+                    } catch (InvalidKeyException ignore) {}
                 }
                 System.out.println(pkg.getPayload());
             } catch (InterruptedException ignored){}
