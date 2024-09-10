@@ -12,7 +12,7 @@ public class GoReplayMiddleware {
 
     HashMap<String, String> transactionMap = new HashMap<>();
     HashMap<String, String> byIdPool = new HashMap<>();
-    List<GoReplayPackage> reprocessQueue = new ArrayList<>();
+    List<GraphDBPackage> reprocessQueue = new ArrayList<>();
 
     public GoReplayMiddleware(){
         Thread thread = Thread.currentThread();
@@ -26,9 +26,9 @@ public class GoReplayMiddleware {
         Scanner scanner = new Scanner(System.in);
         while (inOperation.get()) {
             try {
-                GoReplayPackage pkg = null;
+                GraphDBPackage pkg = null;
                 if(!reprocessQueue.isEmpty()){
-                    for (GoReplayPackage reprocessPackage : reprocessQueue) {
+                    for (GraphDBPackage reprocessPackage : reprocessQueue) {
                         if(transactionMap.containsKey(reprocessPackage.getCompoundTransaction())){
                             pkg = reprocessPackage;
                             reprocessQueue.remove(reprocessPackage);
@@ -37,7 +37,7 @@ public class GoReplayMiddleware {
                     }
                 }
                 if(pkg == null){
-                    pkg = new GoReplayPackage(scanner);
+                    pkg = new GraphDBPackage(scanner);
                 }
                 if(pkg.getType() == '1'){
                     if(pkg.isCompoundTransaction()){
