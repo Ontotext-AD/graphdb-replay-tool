@@ -8,6 +8,10 @@ import java.util.*;
  */
 public class GoReplayPackage {
 
+    public final static char PACKAGE_TYPE_REQUEST = '1';
+    public final static char PACKAGE_TYPE_RESPONSE = '2';
+    public final static char PACKAGE_TYPE_REPLAY = '3';
+
     final private String receivedRaw;
     protected String receivedDecoded;
     private boolean modified = false;

@@ -1,3 +1,4 @@
+import com.ontotext.graphdb.replaytool.goreplay.GoReplayPackage;
 import com.ontotext.graphdb.replaytool.goreplay.RDF4JPackage;
 import org.junit.Test;
 
@@ -47,7 +48,7 @@ public class RDF4JPackageTest {
         assertEquals("Package ID does not match", rdf4JPackage.getId(), REQ_ID);
         assertNull("Bogus transaction ID", rdf4JPackage.getCompoundTransaction());
         assertFalse("Package is not part of a compound transaction", rdf4JPackage.isCompoundTransaction());
-        assertEquals("Incorrect payload type, should be 1", rdf4JPackage.getType(),'1');
+        assertEquals("Incorrect payload type, should be 1", rdf4JPackage.getType(), GoReplayPackage.PACKAGE_TYPE_REQUEST);
         rdf4JPackage.replaceCompoundTransaction(RES_NEW_TRANSACTION_ID);
         assertEquals("Payload should be unchanged", rdf4JPackage.getPayload(), REQ_NO_TRANSACTION);
     }

@@ -36,7 +36,7 @@ public class RDF4JPackage extends GoReplayPackage {
         } else {
             transactionMatched = true;
         }
-        if (getType() == '1') {
+        if (getType() == PACKAGE_TYPE_REQUEST) {
             // Request package transaction ID is in the first line of the request
             matchArea = receivedDecoded.substring(getHeaderLength() - 1,
                     receivedDecoded.indexOf("\n", getHeaderLength() + 1) - getHeaderLength());
