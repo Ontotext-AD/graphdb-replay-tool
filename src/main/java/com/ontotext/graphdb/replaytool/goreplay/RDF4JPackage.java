@@ -55,9 +55,9 @@ public class RDF4JPackage extends GoReplayPackage {
 
     /**
      * Check if the package references a GraphDB compound transaction in the URL for requests and in a Location header
-     * for responces.
+     * for responses.
      *
-     * @return True if a compoind transaction ID has been identified
+     * @return True if a compound transaction ID has been identified
      */
     public boolean isCompoundTransaction() {
         return findCompoundTransaction();

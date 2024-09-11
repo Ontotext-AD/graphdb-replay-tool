@@ -9,9 +9,14 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 public class GraphDBPackage extends RDF4JPackage {
 
-    static Pattern AUTHORIZATION_TOKEN = Pattern.compile("Authorization: ((\\w+) ([^\\s]+))", Pattern.CASE_INSENSITIVE);
+    static Pattern AUTHORIZATION_TOKEN = Pattern.compile("Authorization: ((\\w+) (\\S+))", Pattern.CASE_INSENSITIVE);
 
     static public final String AUTHORIZATION_TYPE_NONE = "NONE";
     static public final String AUTHORIZATION_TYPE_BASIC = "basic";
@@ -22,10 +27,12 @@ public class GraphDBPackage extends RDF4JPackage {
     private String authorizationToken = null;
     private String authorizationType = null;
     private String authorizationValue = null;
+    private String authorizationUsername = null;
 
     private static final Map<String, String> authorizationTokenCache = new HashMap<>();
 
     private static Mac hmac;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Reads a package and parses it for authentication
@@ -59,6 +66,23 @@ public class GraphDBPackage extends RDF4JPackage {
             } else {
                 authorizationToken = matcher.group(3);
             }
+            if (AUTHORIZATION_TYPE_BASIC.equals(getAuthorizationType())) {
+                String token = getAuthorizationToken();
+                String decoded = new String(Base64.getDecoder().decode(token));
+                authorizationUsername = decoded.substring(0, decoded.indexOf(":"));
+            }
+            if (AUTHORIZATION_TYPE_GDB.equals(getAuthorizationType())) {
+                String token = getAuthorizationToken();
+                String tokenPayload = new String(Base64.getDecoder().decode(token.substring(0, token.indexOf(".") )));
+                try {
+                    TypeReference<HashMap<String,Object>> hashMapTypeReference = new TypeReference<>() {};
+                    HashMap<String, Object> userInfo = objectMapper.readValue(tokenPayload, hashMapTypeReference);
+                    authorizationUsername = (String) userInfo.get("username");
+                } catch (JsonProcessingException e) {
+                    authorizationType = AUTHORIZATION_TYPE_NONE;
+                }
+
+            }
         } else {
             authorizationType = AUTHORIZATION_TYPE_NONE;
         }
@@ -85,9 +109,9 @@ public class GraphDBPackage extends RDF4JPackage {
     /**
      * Authorization type, one of:
      * <UL>
-     * <LI>AUTHORIZATION_TYPE_NONE
-     * <LI>AUTHORIZATION_TYPE_GDB
-     * <LI>AUTHORIZATION_TYPE_BASIC
+     * <LI>AUTHORIZATION_TYPE_NONE</LI>
+     * <LI>AUTHORIZATION_TYPE_GDB</LI>
+     * <LI>AUTHORIZATION_TYPE_BASIC</LI>
      * </UL>
      * <P>Digest is currently not supported</P>
      *
@@ -98,20 +122,12 @@ public class GraphDBPackage extends RDF4JPackage {
     }
 
     /**
-     * The authorization user name
+     * The authorization username
      *
      * @return Username
      */
     public String getAuthorizationUser() {
-        if (AUTHORIZATION_TYPE_BASIC.equals(getAuthorizationType())) {
-            String decoded = new String(Base64.getDecoder().decode(receivedDecoded));
-            return decoded.substring(0, decoded.indexOf(":") - 1);
-        }
-        if (AUTHORIZATION_TYPE_GDB.equals(getAuthorizationType())) {
-            String token = getAuthorizationToken();
-            return new String(Base64.getDecoder().decode(token.substring(0, token.indexOf(".") - 1)));
-        }
-        return null;
+        return authorizationUsername;
     }
 
     /**
@@ -133,11 +149,20 @@ public class GraphDBPackage extends RDF4JPackage {
         if (hmac == null) {
             throw new InvalidKeyException("HMAC not initialized");
         }
-        return Base64.getEncoder().encodeToString(hmac.doFinal(user.getBytes()));
+        HashMap<String,Object> userInfo = new HashMap<>();
+        userInfo.put("username", user);
+        userInfo.put("authenticatedAt", System.currentTimeMillis());
+        try {
+            String tokenPayload = objectMapper.writeValueAsString(userInfo);
+            return Base64.getEncoder().encodeToString(tokenPayload.getBytes()) + "." +
+                    Base64.getEncoder().encodeToString(hmac.doFinal(tokenPayload.getBytes()));
+        } catch (JsonProcessingException e) {
+            return authorizationValue;
+        }
     }
 
     /**
-     * Replace authorication token with a newly generated token for the same user
+     * Replace authorization token with a newly generated token for the same user
      *
      * @throws InvalidKeyException Thrown if the HMAC is not initialized
      */
@@ -153,8 +178,7 @@ public class GraphDBPackage extends RDF4JPackage {
                 authorizationTokenCache.put(user, token);
             }
             modify();
-            final String newAuthorizationValue = "GDB " + Base64.getEncoder().encodeToString(user.getBytes()) + "." +
-                    token;
+            final String newAuthorizationValue = "GDB " + token;
             receivedDecoded = receivedDecoded.replace(authorizationValue, newAuthorizationValue);
             authorizationValue = newAuthorizationValue;
             authorizationType = AUTHORIZATION_TYPE_GDB;

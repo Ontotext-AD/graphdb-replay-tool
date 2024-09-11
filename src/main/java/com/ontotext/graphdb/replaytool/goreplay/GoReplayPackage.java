@@ -30,7 +30,6 @@ public class GoReplayPackage {
     public GoReplayPackage(String receivedRaw) {
         this.receivedRaw = receivedRaw;
         parsePackage();
-
     }
 
     /**
@@ -39,7 +38,7 @@ public class GoReplayPackage {
      * Decodes the package payload identifies type and ID
      * </p>
      *
-     * @param stream A Scanner connected to an imput stream that will receive the package
+     * @param stream A Scanner connected to an input stream that will receive the package
      * @throws NoSuchElementException If line is not found
      */
     public GoReplayPackage(Scanner stream) throws NoSuchElementException {
@@ -93,7 +92,7 @@ public class GoReplayPackage {
     }
 
     /**
-     * Returns the uniqie ID that links request/response/replay response
+     * Returns the unique ID that links request/response/replay response
      *
      * @return Request ID
      */
