@@ -5,6 +5,11 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Handles RDF4J specifics: Detects and replaces compound transaction IDs
+ * @author Copyright &copy; 2024 Ontotext AD
+ * @version 1.0
+ */
 public class RDF4JPackage extends GoReplayPackage {
 
 
@@ -15,14 +20,21 @@ public class RDF4JPackage extends GoReplayPackage {
     private boolean transactionMatched = false;
 
     /**
-     * @see GoReplayPackage(Scanner)
+     * Construct a RDF4J Package instance from a stream
+     *
+     * @param stream Scanner to read the next line from
+     * @throws NoSuchElementException when nothing is available to read
+     * @see GoReplayPackage#GoReplayPackage(Scanner)
      */
     public RDF4JPackage(Scanner stream) throws NoSuchElementException {
         super(stream);
     }
 
     /**
-     * @see GoReplayPackage(String)
+     * Construct a RDF4J Package instance from string
+     *
+     * @param receivedRaw Raw GoReplay package
+     * @see GoReplayPackage#GoReplayPackage(String)
      */
     public RDF4JPackage(String receivedRaw) {
         super(receivedRaw);

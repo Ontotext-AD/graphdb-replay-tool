@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Middleware implementation for GoReplay to handle GraphDB traffic
+ * @author Copyright &copy; 2024 Ontotext AD
+ * @version 1.0
+ */
 public class GoReplayMiddleware {
 
     final AtomicBoolean inOperation = new AtomicBoolean(true);
@@ -16,6 +21,9 @@ public class GoReplayMiddleware {
     final List<GraphDBPackage> reprocessQueue = new ArrayList<>();
     private Boolean processAuthorization = false;
 
+    /**
+     * Installs a shutdown hook and initializes the authentication engine
+     */
     public GoReplayMiddleware(){
         Thread thread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -31,6 +39,9 @@ public class GoReplayMiddleware {
         }
     }
 
+    /**
+     * Main middleware loop
+     */
     public void run(){
         Scanner scanner = new Scanner(System.in);
         while (inOperation.get()) {

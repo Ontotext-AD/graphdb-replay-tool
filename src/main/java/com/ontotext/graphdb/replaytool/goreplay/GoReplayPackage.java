@@ -3,18 +3,21 @@ package com.ontotext.graphdb.replaytool.goreplay;
 import java.util.*;
 
 /**
+ * Handles GoReplay package decoding and parsing of the GoReplay header, as well as encoding.
  * @author Copyright &copy; 2024 Ontotext AD
  * @version 1.0
- *
- * Handles GoReplay package decoding and parsing of the GoReplay header, as well as encoding.
  */
 public class GoReplayPackage {
 
+    /** Package is an HTTP request */
     public final static char PACKAGE_TYPE_REQUEST = '1';
+    /** Package is an HTTP response from the source instance */
     public final static char PACKAGE_TYPE_RESPONSE = '2';
+    /** Package is an HTTP response from the target instance */
     public final static char PACKAGE_TYPE_REPLAY = '3';
 
     final private String receivedRaw;
+    /** Decoded package with header */
     protected String receivedDecoded;
     private boolean modified = false;
     final private HexFormat hex = HexFormat.of();
@@ -69,6 +72,9 @@ public class GoReplayPackage {
         return headerLength;
     }
 
+    /**
+     * Set the package as modified
+     * */
     protected void modify() {
         modified = true;
     }

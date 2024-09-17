@@ -13,13 +13,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
+/**
+ * Handles GraphDB specifics. User authentication and gen generate GDB authentication tokens
+ * @author Copyright &copy; 2024 Ontotext AD
+ * @version 1.0
+ */
 public class GraphDBPackage extends RDF4JPackage {
 
     static final Pattern AUTHORIZATION_TOKEN = Pattern.compile("Authorization: ((\\w+) (\\S+))", Pattern.CASE_INSENSITIVE);
 
+    /** Authentication not found or not supported */
     static public final String AUTHORIZATION_TYPE_NONE = "NONE";
+    /** HTTP Basic authentication */
     static public final String AUTHORIZATION_TYPE_BASIC = "basic";
+    /** Authentication using a GraphDB authentication token */
     static public final String AUTHORIZATION_TYPE_GDB = "gdb";
 
     private static final String HMAC_ALGO = "HmacSHA256";
@@ -37,7 +44,10 @@ public class GraphDBPackage extends RDF4JPackage {
     /**
      * Reads a package and parses it for authentication
      *
-     * @see GoReplayPackage(Scanner)
+     * @param stream Scanner to read the next line from
+     * @throws NoSuchElementException when nothing is available to read
+     * @throws InterruptedException if process receives a signal while reading
+     * @see GoReplayPackage#GoReplayPackage(Scanner)
      */
     public GraphDBPackage(Scanner stream) throws NoSuchElementException, InterruptedException {
         super(stream);
@@ -47,7 +57,8 @@ public class GraphDBPackage extends RDF4JPackage {
     /**
      * Processes a hex encoded GoReplay package and parses it for authentication
      *
-     * @see GoReplayPackage(String)
+     * @param receivedRaw Raw GoReplay package
+     * @see GoReplayPackage#GoReplayPackage(String)
      */
     public GraphDBPackage(String receivedRaw) {
         super(receivedRaw);
@@ -165,6 +176,7 @@ public class GraphDBPackage extends RDF4JPackage {
      * Replace authorization token with a newly generated token for the same user
      *
      * @throws InvalidKeyException Thrown if the HMAC is not initialized
+     * @see #setAuthorizationSecret(String) 
      */
     public void replaceAuthorizationToken() throws InvalidKeyException {
         if (!usesAuthorization()) return;
