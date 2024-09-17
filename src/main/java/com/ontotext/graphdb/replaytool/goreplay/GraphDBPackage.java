@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GraphDBPackage extends RDF4JPackage {
 
-    static Pattern AUTHORIZATION_TOKEN = Pattern.compile("Authorization: ((\\w+) (\\S+))", Pattern.CASE_INSENSITIVE);
+    static final Pattern AUTHORIZATION_TOKEN = Pattern.compile("Authorization: ((\\w+) (\\S+))", Pattern.CASE_INSENSITIVE);
 
     static public final String AUTHORIZATION_TYPE_NONE = "NONE";
     static public final String AUTHORIZATION_TYPE_BASIC = "basic";

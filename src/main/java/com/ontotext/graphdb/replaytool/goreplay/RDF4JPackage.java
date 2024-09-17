@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 public class RDF4JPackage extends GoReplayPackage {
 
 
-    static Pattern TRANSACTION_MATCH_REQUEST = Pattern.compile("/transactions/([0-9a-fA-Z\\-]+)((\\s)|(\\?.*))HTTP", Pattern.CASE_INSENSITIVE);
-    static Pattern TRANSACTION_MATCH_HEADER = Pattern.compile("Location: .*/transactions/([0-9a-fA-Z\\-]+)", Pattern.CASE_INSENSITIVE);
+    static final Pattern TRANSACTION_MATCH_REQUEST = Pattern.compile("/transactions/([0-9a-fA-Z\\-]+)((\\s)|(\\?.*))HTTP", Pattern.CASE_INSENSITIVE);
+    static final Pattern TRANSACTION_MATCH_HEADER = Pattern.compile("Location: .*/transactions/([0-9a-fA-Z\\-]+)", Pattern.CASE_INSENSITIVE);
 
     private String compoundTransaction = null;
     private boolean transactionMatched = false;

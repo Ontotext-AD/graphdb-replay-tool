@@ -9,11 +9,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GoReplayMiddleware {
 
-    AtomicBoolean inOperation = new AtomicBoolean(true);
+    final AtomicBoolean inOperation = new AtomicBoolean(true);
 
-    HashMap<String, String> transactionMap = new HashMap<>();
-    HashMap<String, String> byIdPool = new HashMap<>();
-    List<GraphDBPackage> reprocessQueue = new ArrayList<>();
+    final HashMap<String, String> transactionMap = new HashMap<>();
+    final HashMap<String, String> byIdPool = new HashMap<>();
+    final List<GraphDBPackage> reprocessQueue = new ArrayList<>();
     private Boolean processAuthorization = false;
 
     public GoReplayMiddleware(){
