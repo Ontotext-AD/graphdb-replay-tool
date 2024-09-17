@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# THIS IS AN EXAMPLE
+# Please edit this file before use.
+# Uncomment one of the lines below and edit it as needed
+
+# Use this version of both the source and target servers use authentication. Replace the value of
+# authorization secret with the actual secret configured on the target server. Replace the value of the -jar
+# parameter with the path to the actual jar file.
+# java -Dautorization.secret=GraphDBRulezBigTime -jar path/to/GraphDBGoReplayMiddleware-1.0.jar
+
+# Use this version if no authentication is used
+# java -jar path/to/GraphDBGoReplayMiddleware-1.0.jar
+
+# Catch all - empty middleware
+echo "WARNING! Edit this file before use!" >&2
+while read line
+do
+    echo $line
+done
+

@@ -5,6 +5,8 @@ import java.util.*;
 /**
  * @author Copyright &copy; 2024 Ontotext AD
  * @version 1.0
+ *
+ * Handles GoReplay package decoding and parsing of the GoReplay header, as well as encoding.
  */
 public class GoReplayPackage {
 
@@ -119,8 +121,13 @@ public class GoReplayPackage {
      * @return HTTP header
      */
     public String getHttpHeader() {
-        if (extractedHeader == null)
-            extractedHeader = receivedDecoded.substring(headerLength, receivedDecoded.indexOf("\n\n", headerLength + 1) - headerLength);
+        if (extractedHeader == null) {
+            int headerEnd = receivedDecoded.indexOf("\n\n", headerLength);
+            if (headerEnd < 0) {
+                headerEnd = receivedDecoded.length() - 1;
+            }
+            extractedHeader = receivedDecoded.substring(headerLength, headerEnd);
+        }
         return extractedHeader;
     }
 

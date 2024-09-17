@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 public class RDF4JPackage extends GoReplayPackage {
 
 
-    static Pattern TRANSACTION_MATCH_REQUEST = Pattern.compile("/transactions/([0-9a-f\\-]+) HTTP", Pattern.CASE_INSENSITIVE);
-    static Pattern TRANSACTION_MATCH_HEADER = Pattern.compile("Location: .*/transactions/([0-9a-f\\-]+)", Pattern.CASE_INSENSITIVE);
+    static Pattern TRANSACTION_MATCH_REQUEST = Pattern.compile("/transactions/([0-9a-fA-Z\\-]+)((\\s)|(\\?.*))HTTP", Pattern.CASE_INSENSITIVE);
+    static Pattern TRANSACTION_MATCH_HEADER = Pattern.compile("Location: .*/transactions/([0-9a-fA-Z\\-]+)", Pattern.CASE_INSENSITIVE);
 
     private String compoundTransaction = null;
     private boolean transactionMatched = false;
@@ -39,7 +39,7 @@ public class RDF4JPackage extends GoReplayPackage {
         if (getType() == PACKAGE_TYPE_REQUEST) {
             // Request package transaction ID is in the first line of the request
             matchArea = receivedDecoded.substring(getHeaderLength() - 1,
-                    receivedDecoded.indexOf("\n", getHeaderLength() + 1) - getHeaderLength());
+                    receivedDecoded.indexOf("\n", getHeaderLength() + 1));
             matcher = TRANSACTION_MATCH_REQUEST.matcher(matchArea);
         } else {
             // Response package, transaction ID is in the Location header
