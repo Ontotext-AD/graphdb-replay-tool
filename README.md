@@ -25,15 +25,14 @@ mvn clean install
 When capturing traffic under Linux/macOS/*BSD, GoReplay must be run as **root**, to create a raw socket and set the 
 network interface to promiscuous mode. Under Windows, elevation is required.
 
-When capturing GraphDB traffic **-input-raw-track-response** is mandatory to latter replay compound transactions 
+When capturing GraphDB traffic, using **-input-raw-track-response** is mandatory to latter replay compound transactions 
 sucessfully.
 
-If you want to inhibit logging of authentication secrets, please pass 
-**-http-disallow-header Authorization**. But in this case, the middleware will not generate 
+If you want to inhibit logging of authentication secrets, pass 
+**-http-disallow-header Authorization**. In this case, the middleware will not generate 
 authentication tokens, as the username will not be available.
 
-Please note that TLS traffic (HTTPS) can only be captured using the **-input-raw-protocol binary**
-option and *will not produce usable results*
+> :page_with_curl: **Note:** TLS traffic (HTTPS) can only be captured using the **-input-raw-protocol binary** option and *will not produce usable results*
 
 The middleware application has no function when recording to a file and will actually
 hinder the recording process by blocking recording of any requests involving compound
@@ -52,7 +51,7 @@ Other useful options are:
     enable promiscuous mode
 -http-disallow-url value
     A regexp to match requests against. Filter get matched against full url with domain. 
-    Anything else will be forwarded
+    Anything else will be forwarded.
 ```
 
 ### Replaying traffic
@@ -60,16 +59,16 @@ To replay traffic, you must specify both the **-output-http** and the **-middlew
 options. The parameter to http-output is just a network address and port, for example, 
 "staging.domain.com:7200" or "10.20.30.40:7200". 
 
-When replaying traffic through this middleware the **--output-http-track-response** 
+When replaying traffic through this middleware, the **--output-http-track-response** 
 option is mandatory. If it is not specified, the tool can't replay compound transactions
 and any request part of a compound transaction will be enqueued until a new transaction
 ID is received. This will never happen, and the tool will eventually run out of memory.
 
-Please note that the middleware application has no knowledge as to what parameters
+> :page_with_curl: **Note:** The middleware application has no knowledge as to what parameters
 you called GoReplay with and can't detect and alert you of these errors.
 
 The parameter to middleware must be this application. We recommend that you create a simple
-bash or CMD.EXE script to start java and the middleware application like so:
+bash or CMD.EXE script to start java and the middleware application, such as:
 ```
 #!/bin/sh
 
@@ -108,8 +107,8 @@ sudo goreplay --input-raw {server_or_lb_address}:7200 --input-raw-track-response
         --middleware graphdb-mw.sh --output-http {target_server_or_lb}:7200 \
         --output-http-track-response
 ```
-**Important:** For this use case, you must make sure, that the tool will not capture its own
-requests, as an endless loop will result. If you specify "--input-raw :7200" in the example 
+> :warning: **Important:** For this use case, you must make sure that the tool will not capture its own
+requests, as doing so causes an endless loop. If you specify "--input-raw :7200" in the example 
 above, the tool will have no means of telling its own requests to {target_server_or_lb} apart, because 
 they are going to the same port.
 
