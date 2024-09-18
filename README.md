@@ -25,7 +25,7 @@ mvn clean install
 When capturing traffic under Linux/macOS/*BSD, GoReplay must be run as **root**, to create a raw socket and set the 
 network interface to promiscuous mode. Under Windows, elevation is required.
 
-When capturing GraphDB traffic **-input-raw-track-response** is mandatory to латер replay compound transactions 
+When capturing GraphDB traffic **-input-raw-track-response** is mandatory to latter replay compound transactions 
 sucessfully.
 
 If you want to inhibit logging of authentication secrets, please pass 
