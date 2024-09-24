@@ -84,8 +84,7 @@ public class GoReplayMiddleware {
             if (processAuthorization && pkg.usesAuthorization()) {
                 try {
                     pkg.replaceAuthorizationToken();
-                } catch (InvalidKeyException ignore) {
-                }
+                } catch (InvalidKeyException ignore) {}
             }
             System.out.println(pkg.getPayload());
         }

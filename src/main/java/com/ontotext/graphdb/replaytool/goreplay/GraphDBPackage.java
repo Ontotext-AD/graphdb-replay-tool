@@ -153,9 +153,9 @@ public class GraphDBPackage extends RDF4JPackage {
         userInfo.put("username", user);
         userInfo.put("authenticatedAt", System.currentTimeMillis());
         try {
-            String tokenPayload = objectMapper.writeValueAsString(userInfo);
-            return Base64.getEncoder().encodeToString(tokenPayload.getBytes()) + "." +
-                    Base64.getEncoder().encodeToString(hmac.doFinal(tokenPayload.getBytes()));
+            byte[] tokenPayload = objectMapper.writeValueAsString(userInfo).getBytes();
+            return Base64.getEncoder().encodeToString(tokenPayload) + "." +
+                    Base64.getEncoder().encodeToString(hmac.doFinal(tokenPayload));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return authorizationToken;
@@ -170,7 +170,7 @@ public class GraphDBPackage extends RDF4JPackage {
      */
     public void replaceAuthorizationToken() throws InvalidKeyException {
         if (!usesAuthorization()) return;
-        final String user = getAuthorizationUser();
+        String user = getAuthorizationUser();
         if (user != null) {
             String token;
             if (authorizationTokenCache.containsKey(user)) {
@@ -180,7 +180,7 @@ public class GraphDBPackage extends RDF4JPackage {
                 authorizationTokenCache.put(user, token);
             }
             modify();
-            final String newAuthorizationValue = "GDB " + token;
+            String newAuthorizationValue = "GDB " + token;
             receivedDecoded = receivedDecoded.replace(authorizationValue, newAuthorizationValue);
             authorizationValue = newAuthorizationValue;
             authorizationType = AUTHORIZATION_TYPE_GDB;
