@@ -1,6 +1,6 @@
 package com.ontotext.graphdb.replaytool.goreplay;
 
-import java.util.*;
+import java.util.HexFormat;
 
 /**
  * Handles GoReplay package decoding and parsing of the GoReplay header, as well as encoding.
@@ -10,17 +10,19 @@ import java.util.*;
 public class GoReplayPackage {
 
     /** Package is an HTTP request */
-    public final static char PACKAGE_TYPE_REQUEST = '1';
+    public static final char PACKAGE_TYPE_REQUEST = '1';
     /** Package is an HTTP response from the source instance */
-    public final static char PACKAGE_TYPE_RESPONSE = '2';
+    public static final char PACKAGE_TYPE_RESPONSE = '2';
     /** Package is an HTTP response from the target instance */
-    public final static char PACKAGE_TYPE_REPLAY = '3';
+    public static final char PACKAGE_TYPE_REPLAY = '3';
 
-    final private String receivedRaw;
+    private static final String HTTP_HEADER_END = "\n\n";
+
+    private final String receivedRaw;
     /** Decoded package with header */
     protected String receivedDecoded;
     private boolean modified = false;
-    final private HexFormat hex = HexFormat.of();
+    private final HexFormat hex = HexFormat.of();
     private char type;
     private String id;
 
@@ -38,20 +40,6 @@ public class GoReplayPackage {
      */
     public GoReplayPackage(String receivedRaw) {
         this.receivedRaw = receivedRaw;
-        parsePackage();
-    }
-
-    /**
-     * Get package from a open stream Scanner
-     * <p>
-     * Decodes the package payload identifies type and ID
-     * </p>
-     *
-     * @param stream A Scanner connected to an input stream that will receive the package
-     * @throws NoSuchElementException If line is not found
-     */
-    public GoReplayPackage(Scanner stream) throws NoSuchElementException {
-        receivedRaw = stream.nextLine();
         parsePackage();
     }
 
@@ -77,6 +65,7 @@ public class GoReplayPackage {
      * */
     protected void modify() {
         modified = true;
+        extractedHeader = null;
     }
 
     /**
@@ -128,7 +117,7 @@ public class GoReplayPackage {
      */
     public String getHttpHeader() {
         if (extractedHeader == null) {
-            int headerEnd = receivedDecoded.indexOf("\n\n", headerLength);
+            int headerEnd = receivedDecoded.indexOf(HTTP_HEADER_END, headerLength);
             if (headerEnd < 0) {
                 headerEnd = receivedDecoded.length() - 1;
             }

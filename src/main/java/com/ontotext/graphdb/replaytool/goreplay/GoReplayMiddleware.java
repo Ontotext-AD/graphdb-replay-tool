@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Middleware implementation for GoReplay to handle GraphDB traffic
+ *
  * @author Copyright &copy; 2024 Ontotext AD
  * @version 1.0
  */
@@ -24,72 +25,69 @@ public class GoReplayMiddleware {
     /**
      * Installs a shutdown hook and initializes the authentication engine
      */
-    public GoReplayMiddleware(){
-        Thread thread = Thread.currentThread();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            inOperation.set(false);
-            thread.interrupt();
-        }));
+    public GoReplayMiddleware() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> inOperation.set(false)));
         String authorizationSecret = System.getProperty("authorization.secret");
         if (authorizationSecret != null) {
             try {
                 GraphDBPackage.setAuthorizationSecret(authorizationSecret);
                 processAuthorization = true;
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         }
     }
 
     /**
      * Main middleware loop
      */
-    public void run(){
+    public void run() {
         Scanner scanner = new Scanner(System.in);
         while (inOperation.get()) {
-            try {
-                GraphDBPackage pkg = null;
-                if(!reprocessQueue.isEmpty()){
-                    for (GraphDBPackage reprocessPackage : reprocessQueue) {
-                        if(transactionMap.containsKey(reprocessPackage.getCompoundTransaction())){
-                            pkg = reprocessPackage;
-                            reprocessQueue.remove(reprocessPackage);
-                            break;
-                        }
+            GraphDBPackage pkg = null;
+            if (!reprocessQueue.isEmpty()) {
+                for (GraphDBPackage reprocessPackage : reprocessQueue) {
+                    if (transactionMap.containsKey(reprocessPackage.getCompoundTransaction())) {
+                        pkg = reprocessPackage;
+                        reprocessQueue.remove(reprocessPackage);
+                        break;
                     }
                 }
-                if(pkg == null){
-                    pkg = new GraphDBPackage(scanner);
+            }
+            if (pkg == null) {
+                String receivedRaw = scanner.nextLine();
+                pkg = new GraphDBPackage(receivedRaw);
+            }
+            if (pkg.getType() == '1') {
+                if (pkg.isCompoundTransaction()) {
+                    if (transactionMap.containsKey(pkg.getCompoundTransaction())) {
+                        pkg.replaceCompoundTransaction(transactionMap.get(pkg.getCompoundTransaction()));
+                    } else {
+                        reprocessQueue.add(pkg);
+                        continue;
+                    }
                 }
-                if(pkg.getType() == '1'){
-                    if(pkg.isCompoundTransaction()){
-                        if(transactionMap.containsKey(pkg.getCompoundTransaction())){
-                            pkg.replaceCompoundTransaction(transactionMap.get(pkg.getCompoundTransaction()));
+            } else {
+                if (pkg.isCompoundTransaction()) {
+                    String id = pkg.getId();
+                    if (byIdPool.containsKey(id)) {
+                        if (pkg.getType() == '2') {
+                            transactionMap.put(pkg.getCompoundTransaction(), byIdPool.get(id));
                         } else {
-                            reprocessQueue.add(pkg);
-                            continue;
+                            transactionMap.put(byIdPool.get(id), pkg.getCompoundTransaction());
                         }
-                    }
-                } else {
-                    if(pkg.isCompoundTransaction()){
-                        String id = pkg.getId();
-                        if(byIdPool.containsKey(id)){
-                            if(pkg.getType() == '2'){
-                                transactionMap.put(pkg.getCompoundTransaction(), byIdPool.get(id));
-                            } else {
-                                transactionMap.put(byIdPool.get(id), pkg.getCompoundTransaction());
-                            }
-                            byIdPool.remove(id);
-                        } else {
-                            byIdPool.put(id, pkg.getCompoundTransaction());
-                        }
+                        byIdPool.remove(id);
+                    } else {
+                        byIdPool.put(id, pkg.getCompoundTransaction());
                     }
                 }
-                if(processAuthorization && pkg.usesAuthorization()) {
-                    try {
-                        pkg.replaceAuthorizationToken();
-                    } catch (InvalidKeyException ignore) {}
+            }
+            if (processAuthorization && pkg.usesAuthorization()) {
+                try {
+                    pkg.replaceAuthorizationToken();
+                } catch (InvalidKeyException ignore) {
                 }
-                System.out.println(pkg.getPayload());
-            } catch (InterruptedException ignored){}
+            }
+            System.out.println(pkg.getPayload());
         }
     }
 }

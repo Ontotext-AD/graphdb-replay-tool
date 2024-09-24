@@ -1,7 +1,5 @@
 package com.ontotext.graphdb.replaytool.goreplay;
 
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,17 +16,6 @@ public class RDF4JPackage extends GoReplayPackage {
 
     private String compoundTransaction = null;
     private boolean transactionMatched = false;
-
-    /**
-     * Construct a RDF4J Package instance from a stream
-     *
-     * @param stream Scanner to read the next line from
-     * @throws NoSuchElementException when nothing is available to read
-     * @see GoReplayPackage#GoReplayPackage(Scanner)
-     */
-    public RDF4JPackage(Scanner stream) throws NoSuchElementException {
-        super(stream);
-    }
 
     /**
      * Construct a RDF4J Package instance from string

@@ -1,17 +1,19 @@
 package com.ontotext.graphdb.replaytool.goreplay;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Handles GraphDB specifics. User authentication and gen generate GDB authentication tokens
@@ -23,11 +25,11 @@ public class GraphDBPackage extends RDF4JPackage {
     static final Pattern AUTHORIZATION_TOKEN = Pattern.compile("Authorization: ((\\w+) (\\S+))", Pattern.CASE_INSENSITIVE);
 
     /** Authentication not found or not supported */
-    static public final String AUTHORIZATION_TYPE_NONE = "NONE";
+    public static final String AUTHORIZATION_TYPE_NONE = "NONE";
     /** HTTP Basic authentication */
-    static public final String AUTHORIZATION_TYPE_BASIC = "basic";
+    public static final String AUTHORIZATION_TYPE_BASIC = "basic";
     /** Authentication using a GraphDB authentication token */
-    static public final String AUTHORIZATION_TYPE_GDB = "gdb";
+    public static final String AUTHORIZATION_TYPE_GDB = "gdb";
 
     private static final String HMAC_ALGO = "HmacSHA256";
 
@@ -40,19 +42,6 @@ public class GraphDBPackage extends RDF4JPackage {
 
     private static Mac hmac;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    /**
-     * Reads a package and parses it for authentication
-     *
-     * @param stream Scanner to read the next line from
-     * @throws NoSuchElementException when nothing is available to read
-     * @throws InterruptedException if process receives a signal while reading
-     * @see GoReplayPackage#GoReplayPackage(Scanner)
-     */
-    public GraphDBPackage(Scanner stream) throws NoSuchElementException, InterruptedException {
-        super(stream);
-        parseAuthorizationToken();
-    }
 
     /**
      * Processes a hex encoded GoReplay package and parses it for authentication
@@ -168,7 +157,8 @@ public class GraphDBPackage extends RDF4JPackage {
             return Base64.getEncoder().encodeToString(tokenPayload.getBytes()) + "." +
                     Base64.getEncoder().encodeToString(hmac.doFinal(tokenPayload.getBytes()));
         } catch (JsonProcessingException e) {
-            return authorizationValue;
+            e.printStackTrace();
+            return authorizationToken;
         }
     }
 
